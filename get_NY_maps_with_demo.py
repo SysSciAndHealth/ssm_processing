@@ -62,10 +62,10 @@ def connect():
     conn = None
     try:
         print "Connecting to ssm database..."
-        conn = psycopg2.connect(host="172.25.8.94",
-                                database="ssm",
-                                user="ssm",
-                                port="5432")
+        conn = psycopg2.connect(host="",
+                                database="",
+                                user="",
+                                port="")
     except (Exception, psycopg2.DatabaseError) as error:
         print error
     return conn
