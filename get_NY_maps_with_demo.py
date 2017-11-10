@@ -48,53 +48,11 @@ import json
 import string
 import re
 import psycopg2
-
-
-def connect():
-    """ Connect to ssm PostgreSQL database
-
-        Args:
-            None: hardwired to a particular database.
-
-        Returns:
-            connection to database.
-     """
-    conn = None
-    try:
-        print "Connecting to ssm database..."
-        conn = psycopg2.connect(host="",
-                                database="",
-                                user="",
-                                port="")
-    except (Exception, psycopg2.DatabaseError) as error:
-        print error
-    return conn
-
-
-def get_maps(sort_index):
-    """ Get a list of tuples from the PostgreSQL database, each tuple of which
-        is a dict representing an ssm plus associated metadata.
-
-        Arg:
-            sort_index: the int index of the tuple elements to be used as the
-            basis for sorting the tuples in the list.
-
-        Returns:
-            a sorted list of tuples.
-    """
-    conn = connect()
-    cur = conn.cursor()
-    cur.execute("SELECT * from maps")
-    maps = cur.fetchall()
-    cur.close()
-    conn.close()
-    print "number of maps fetched: " + str(len(maps))
-    return sorted(maps, key=lambda k: k[sort_index])
+from ssm_utilities import connect, get_maps
 
 
 def print_header():
-    print ("      Size (bytes)     " +
-           "Last modified")
+    print ("      Size (bytes)     Last modified")
     print "_" * 75
 
 
@@ -120,7 +78,7 @@ def get_pad2(s1, s2):
     """ Returns a string of whitespace padding to insert between strings s1
         and s2 so that the length of s1 + padding + s2 = 40.
     """
-    return " " * (40 - len(s1) - len(s2))
+    return " " * (12 - len(s1) - len(s2))
 
 
 def print_row(n, sz, last_modified):
@@ -135,7 +93,7 @@ def print_row(n, sz, last_modified):
             Nothing
     """
     print (get_pad1(n) + str(n) + ". " + get_pad2("", sz) + sz +
-           " " * 13 + last_modified)
+           " " * 2 + last_modified)
 
 
 def build_output_file_path(dir, role, id):
