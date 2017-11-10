@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 """ ssm_utilities.py: Utility functions for various ssm data processing tasks.
-
 """
 
 import sys
