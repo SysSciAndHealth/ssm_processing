@@ -10,7 +10,6 @@
     nodes that are linked to it in the SSM to which it belongs. Traverse that
     graph, attaching to each node the rlabel that uniquely identifies the root
     Responsibility. 
-
 """
 
 import sys
@@ -54,6 +53,12 @@ def mark_nodes_unvisited(nodes):
         n["visited"] = False
 
 
+def init_rlabel_lists(nodes):
+    for n in nodes:
+        if "rlabels" not in n:
+            n["rlabels"] = []
+
+
 def get_role(nodes):
     for n in nodes:
         if n["type"] == "role":
@@ -80,7 +85,7 @@ def get_responsibilities(nodes):
 
 def build_rlabel(fname, r_id):
     ssm_id = re.findall(r'\d+', fname)[-1]    
-    return "r" + str(r_id) + "-" + ssm_id
+    return "[r" + str(r_id) + "-" + ssm_id + "]"
 
 
 def get_node(id, nodes):
@@ -96,6 +101,19 @@ def get_targets_of(n, links, nodes):
         if l["source"] == n["id"]:
             targets.append(get_node(l["target"], nodes))
     return targets
+
+
+def get_sources_of(n, links, nodes):
+    sources = []
+    for l in links:
+        if l["target"] == n["id"]:
+            sources.append(get_node(l["source"], nodes))
+    return sources
+
+
+def build_outpath(inpath):
+    split_inpath = inpath.rsplit('.', 1)
+    return split_inpath[0] + "-rlabeled.json"
 
 
 def traverse_rgraph(links, nodes, r, resp, fname):
@@ -118,22 +136,21 @@ def traverse_rgraph(links, nodes, r, resp, fname):
             }
         }
 
-    Args:
-        links: the links sub-dict from the current SSM.
-        nodes: the nodes subdict from the current SSM.
-        r: the responsbility node whose subgraph we're traversing.
-        resp: list of responsibility nodes: all need to be marked as "visited."
-        fname: name of the SSM file from which these various elements have been
-            extracted.
-    Returns:
-        None
-"""
+        Args:
+            links: the links sub-dict from the current SSM.
+            nodes: the nodes subdict from the current SSM.
+            r: the responsbility node whose subgraph we're traversing.
+            resp: list of responsibility nodes: all need to be marked as
+                "visited."
+            fname: name of the SSM file from which these various elements have
+                been extracted.
+        Returns:
+            None
+    """
     r_id = r["id"]
     rlabel = build_rlabel(fname, r_id)
-    #newname = r["name"] + " " + rlabel
-    #r["name"] = newname
-    # r["visited"] = True # redundant: covered in init_visitation(...)
     init_visitation(nodes, resp)
+    init_rlabel_lists(nodes)
 
     q = Queue.Queue()
     q.put(r)
@@ -141,14 +158,26 @@ def traverse_rgraph(links, nodes, r, resp, fname):
         n = q.get()
         newname = n["name"] + " " + rlabel
         n["name"] = newname
-#	print "queue not empty: n = " 
-#        print_node(n)
-        # in links, get all targets where n["id"] is source
+        n["rlabels"].append(rlabel)
         targets = get_targets_of(n, links, nodes)
         for t in targets:
             if t["visited"] == False:
                 t["visited"] = True;
                 q.put(t)
+
+    init_visitation(nodes, resp)
+    q.put(r)
+    while not q.empty():
+        n = q.get()
+        if rlabel not in n["rlabels"]: # avoid duplicating rlabels
+            newname = n["name"] + " " + rlabel
+            n["name"] = newname
+            n["rlabels"].append(rlabel)
+        sources = get_sources_of(n, links, nodes)
+        for s in sources:
+            if s["visited"] == False:
+                s["visited"] = True;
+                q.put(s)
 
 
 def add_rlabels_to_single_ssm(inpath):
@@ -165,11 +194,10 @@ def add_rlabels_to_single_ssm(inpath):
                r["name"] + "\"")
         traverse_rgraph(links, nodes, r, resp, ntpath.basename(inpath))
     print_nodes(nodes, 30)
-"""
-    for n in nodes:
-        if n["id"] == resp[0]["id"]:
-            print n["name"]
-"""
+    outpath = build_outpath(inpath)
+    print outpath
+    with open(outpath, "w") as outfile:
+        json.dump(json_object, outfile)
 
 
 def main():
