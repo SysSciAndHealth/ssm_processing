@@ -129,10 +129,10 @@ def traverse_rgraph(links, nodes, r, resp, fname):
         while frontier not empty {
             Vertex v = frontier.pop()
             for each successor v' of v {
-        	if v' unvisited {
-        	    frontier.push(v')
-        	    mark v' visited (v'.distance = v.distance + 1)
-        	}
+                if v' unvisited {
+                    frontier.push(v')
+                    mark v' visited (v'.distance = v.distance + 1)
+                }
             }
         }
 
@@ -165,6 +165,12 @@ def traverse_rgraph(links, nodes, r, resp, fname):
                 t["visited"] = True;
                 q.put(t)
 
+    # Note: this approach isolates the source-to-target links from the target-
+    # to-source links, i.e., it doesn't identify connectivity via the 
+    # combination, e.g., node[a] -> node[b] <- node[c]: node[a] is connected to
+    # node[c] but this won't find it. We need to convert the directed node 
+    # representation to an undirected equivalent if the latter is what we wish
+    # to capture. 
     init_visitation(nodes, resp)
     q.put(r)
     while not q.empty():
@@ -181,12 +187,25 @@ def traverse_rgraph(links, nodes, r, resp, fname):
 
 
 def add_rlabels_to_single_ssm(inpath):
+    """ Open the SSM file located at "inpath". Read it into a dict. Find all
+        Responsibility nodes. For each Responsibility, append an rlabel which
+        uniquely identifies that Responsibility to the "name" value of every
+        node connected to that Responsibility.  Write the rlabeled dict as an
+	SSM to a .json file.
+
+        Arg: 
+            inpath: full path to an SSM file to be rlabeled.
+
+        Returns:
+            None
+    """
     with open(inpath) as json_input_file:
         json_object = json.load(json_input_file)
     json_object = convert(json_object)
     links = json_object["links"]
     nodes = json_object["nodes"]
-    print ("inpath: " + inpath + "; " + str(len(links)) + " links; " + str(len(nodes)) + " nodes")
+    print ("inpath: " + inpath + "; " + str(len(links)) + " links; " +
+        str(len(nodes)) + " nodes")
     resp = get_responsibilities(nodes)
     print str(len(resp)) + " responsibility nodes"
     for n, r in enumerate(resp):
