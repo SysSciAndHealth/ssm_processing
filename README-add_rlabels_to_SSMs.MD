@@ -1,4 +1,23 @@
-<h1>README: add_rlabels_to_SSMs</h1>
+<h1>README: add_rlabels_to_SSMs.py</h1>
+
+<p>An <em>rlabel</em> is a string that uniquely identifies a Responsibility node in the context of a set (a directory) of System Support Maps (SSMs).</p>
+
+<p>
+    Usage:
+        add_rlabels_to_SSMs.py indir outdir [use_full_filename]
+
+    Args:
+        indir: A directory of System Support Map (SSM) files. Expects the files
+            to be in JSON format and end with extension .json.
+        outdir: A directory that is the intended target location for a set of 
+            rlinked ssm files. If outdir doesn't exist, a reasonable attempt 
+            will be made to create it.
+        use_full_filename (optional): Boolean. If true, create rlabel using 
+            the whole input SSM filename (excepting the .json extension). False
+            is the default, in which case the SSM filename is expected to have
+            the form "text<database id>.json, where <database id is the SSM's
+            id in the server PostgreSQL database.
+</p>
 
 <p>First, every Responsibility in every SSM file in the input directory is identified and assigned an rlabel, as follows: "[r" + responsibility node id + "-" + SSM database id + "]".  This uniquely identifies every Responsibility in the input directory of SSMs. For instance, looking in a test ggregated.txt file, I see the text "Academic/classroom support" from the Responsibility node with id = 5 in the SSM with database id = 1008. My script has created an rlabel "[r5-1008]": it's the only responsibility in the whole directory with that rlabel. So the rlabel is appended to the text with this result: "Academic/classroom support [r5-1008]". That rlabel is now attached to that Responsibility's node text if you open up the rlabeled SSM, it's in the BLM generated from map 1008, and it's in the lists of node texts to be sorted, both in RESPONSIBILITIES.txt and aggregated.txt (the latter file simply being the concatenation of all the files of node texts to be sorted that have been separated by ring, both created by blm.R).</p>
 
