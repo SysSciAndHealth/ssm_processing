@@ -8,16 +8,20 @@
 
 <h3>Real-world example</h3>
 <p>From aggregated.txt (or NEEDS.txt). There are these two (originally identical) node text items in the NEEDS list:
-<ul>
-<li>time commitment [r4-1000]</li>
-<li>time commitment [r5-1000]</li>
-</ul>
+
+    ...
+    time commitment [r4-1000]
+    time commitment [r5-1000]
+    ...
+
 I think this is what Shaghayegh was referring to. Without the appended rlabels these two items would be indistinguishable and would probably both be coded the same. However, we see from the rlabels that the first is connected to the Responsibility with id = 4  and the second to the Responsibility with id = 5 from the SSM with database id 1000. The sorting analyst can look under RESPONSIBILITIES and find the corresponding node texts: 
-<ul>
-<li>County Fiscal Team for Special Children's Services division [r4-1000]</li>
-<li>Early Intervention Coordinating Council participant [r5-1000]</li>
-</ul>
-Those could very well require different codes, and the analyst now has the info (via rlabel) to decide whether to assign each the same or a different code. These two identical Responsibility nodes happen to be from the same SSM, but this whole process should apply just as well if they come from different maps. We've probably seen this more than once with needs like "time" or "money".,/p>
+
+    ...
+    County Fiscal Team for Special Children's Services division [r4-1000]
+    Early Intervention Coordinating Council participant [r5-1000]
+    ...
+
+Those could very well require different codes, and the analyst now has the info (via rlabel) to decide whether to assign each the same or a different code. These two identical Responsibility nodes happen to be from the same SSM, but this whole process should apply just as well if they come from different maps. We've probably seen this more than once with needs like "time" or "money".</p>
 
 <h3>A more generic example</h3>
 <p>An analyst might get a list of items to be coded that includes the following:
@@ -36,9 +40,10 @@ Those could very well require different codes, and the analyst now has the info 
     money
     ...
 
-and without additional information the analyst would now conclude that all three "money" node text items belong under a single code, say "Money Needs".
+and without additional information the analyst would now conclude that all three "money" node text items belong under a single code, say "Money Needs".</p>
 
 <p>Rlabeling would provide this information:
+
     ...
     RESPONSIBILITIES:
     ...
@@ -52,6 +57,7 @@ and without additional information the analyst would now conclude that all three
     money [r23-1234]
     money [r11-1196]
     ...
+
 </p>
 
 <p>This would mean that:
