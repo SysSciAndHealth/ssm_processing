@@ -27,7 +27,7 @@ This uniquely identifies every Responsibility in the input directory of SSMs. Fo
 
 <p>Next, the script does a graph traversal from each of those Responsibility nodes, tracking every connection starting *from* a source (Responsibility) *to* all subsequent target nodes until each of those nodes has had attached to its text that same rlabel for the Responsibility node at the root of the graph. Because of arrow directionality conventions, this means that it will primarily be Need nodes that are so labeled (Responsibilities point to Needs; most other node types, when they're connected to a Responsibility, point *to* it).</p> 
 
-<p>We still need to confirm which kinds of nodes are most susceptible to the "source ambiguity" problem identified by analyst Shaghayegh Arangdad. According to my notes from our meeting on 10/11/18, the main concern was with distinguishing whether it's one or multiple Responsibility nodes that are connected to multiple identical Needs. If this is indeed the case, then I think this approach might take care of it. More later about undirected graph traversals.</p>
+<p>We still need to confirm which kinds of nodes are most susceptible to the "source ambiguity" problem identified by analyst Shaghayegh Arangdad. According to my notes from our meeting on 10/11/17, the main concern was with distinguishing whether it's one or multiple Responsibility nodes that are connected to multiple identical Needs. If this is indeed the case, then I think this approach might take care of it. More later about undirected graph traversals.</p>
 
 <h3>Real-world example</h3>
 <p>From aggregated.txt (or NEEDS.txt). There are these two (originally identical) node text items in the NEEDS list:
