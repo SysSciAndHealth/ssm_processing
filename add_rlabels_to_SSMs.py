@@ -11,17 +11,25 @@
     graph, attaching to each node the rlabel that uniquely identifies the root
     Responsibility. 
 
-    Currently accepts a path to a single file as command line argument, 
-    /path/to/ssmfile.json. Writes rlabeled equivalent to 
-    /path/to/ssmfile-rlabeled.json.
-    
-    2do: accept paths to input and output directories as arguments; rlabel
-    every SSM file in the input directory and write the resulting files to the
-    output directory.
+    Usage:
+        add_rlabels_to_SSMs.py indir outdir [use_full_filename]
+
+    Args:
+        indir: A directory of System Support Map (SSM) files. Expects the files
+            to be in JSON format and end with extension .json.
+        outdir: A directory that is the intended target location for a set of 
+            rlinked ssm files. If outdir doesn't exist, a reasonable attempt 
+            will be made to create it.
+        use_full_filename (optional): Boolean. If true, create rlabel using 
+            the whole input SSM filename (excepting the .json extension). False
+            is the default, in which case the SSM filename is expected to have
+            the form "text<database id>.json, where <database id is the SSM's
+            id in the server PostgreSQL database.
 
     2do: handle SSM file names that are not of the form name-<id>.json, where
     <id> is the database id of the SSM, by using the full filename (absent the
-    ".json extension) in the rlabel.
+    ".json extension) in the rlabel. This is what the optional use_full_filename
+    command line argument is for.
 """
 
 import sys
@@ -59,6 +67,55 @@ def convert(input):
         return input.encode('utf-8')
     else:
         return input
+
+
+def get_file_list(dir, suffix):
+    """ Get a list of all the files (in "dir") whose names end in "suffix."
+    Args:
+        dir: the path to a directory.
+        suffix: the ending substring used for selecting files.
+    Returns:
+        a list of files in "dir" ending with "suffix."
+    """
+    files = []
+    files += [fn for fn in os.listdir(dir) if fn.endswith(suffix)]
+    return files
+
+
+def build_path_list(dir, file_list):
+    """ Builds a list of full paths to a set of files.
+    """
+    return [dir + "/" + filename for filename in file_list]
+
+
+def build_rlabeled_ssm_path_list(ssm_files, out_dir):
+    """ Builds a list of full paths to a set of rlabeled SSM files. 
+    Args:
+        ssm_files: A list of SSM filenames, used as the basis for creating
+            rlabeled SSM filenames.
+        out_dir: Path to a directory into which rlabeled SSM files are intended
+            to go.
+    Returns:
+       A list of full paths to rlabeled SSM files.
+    """
+    out_files = []
+    for fname in ssm_files:
+        if fname.endswith(".json") or fname.endswith(".JSON"):
+            out_path = out_dir + "/" + fname[:-5] + "-rlabeled.json"
+            out_files.append(out_path)
+        else:
+            print ("build_rlabeled_ssm_path_list: non-standard input file "
+                   + "name: " + fname)
+    return out_files
+
+
+def print_list(list, title):
+    i = 0
+    width = 3
+    print "\n" + title + ":\n"
+    for item in list:
+        print "%s. %s" % (str(i).rjust(width), item)
+        i += 1
 
 
 def mark_nodes_unvisited(nodes):
@@ -199,15 +256,45 @@ def traverse_rgraph(links, nodes, r, resp, fname):
                 q.put(s)
 
 
-def add_rlabels_to_single_ssm(inpath):
+def build_adjacency_matrix(nnodes, links):
+    m = [[0 for x in range(nnodes)] for y in range(nnodes)]
+    for l in links:
+        s = l["source"]
+	t = l["target"]
+	m[s][t] = m[t][s] = 1
+
+    return m
+    
+"""
+def traverse_undirected_rgraph(m, nodes, r , resp, fname):
+    nnodes = len(nodes)
+    r_id = r["id"]
+    rlabel = build_rlabel(fname, r_id)
+    init_visitation(nodes, resp)
+
+    q = Queue.Queue()
+    q.put(r)
+    while not q.empty():
+        n = q.get()
+        newname = n["name"] + " " + rlabel
+        n["name"] = newname
+        for i in range(0, nnodes):
+                if m[i][n["id"]] == 1:
+                    ] 
+"""
+
+
+def add_rlabels_to_single_ssm(inpath, outpath):
     """ Open the SSM file located at "inpath". Read it into a dict. Find all
         Responsibility nodes. For each Responsibility, append an rlabel which
         uniquely identifies that Responsibility to the "name" value of every
         node connected to that Responsibility.  Write the rlabeled dict as an
-        SSM to a .json file.
+        SSM to outpath.
 
-        Arg: 
+        Args: 
             inpath: full path to an SSM file to be rlabeled.
+            outpath: full path to an SSM file that will be the rlabeled 
+                equivalent of the SSM at inpath.
 
         Returns:
             None
@@ -225,25 +312,33 @@ def add_rlabels_to_single_ssm(inpath):
         print ("resp #" + str(n) + "; id: " + str(r["id"]) + "; name: \"" +
                r["name"] + "\"")
         traverse_rgraph(links, nodes, r, resp, ntpath.basename(inpath))
-    print_nodes(nodes, 30)
-    outpath = build_outpath(inpath)
-    print outpath
+    # print_nodes(nodes, 30)
     with open(outpath, "w") as outfile:
         json.dump(json_object, outfile)
 
 
 def main():
-    if len(sys.argv) < 2:
-        print "usage: add_rlabels_to_SSMs.py inpath use_full_filename"
+    if len(sys.argv) < 3:
+        print "usage: add_rlabels_to_SSMs.py indir outdir [use_full_filename]"
         return
-    inpath = sys.argv[1]
+    indir = sys.argv[1]
+    outdir = sys.argv[2]
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+        print "Created " + outdir
+
     use_full_filename = False
-    if len(sys.argv) > 2 and sys.argv[2] in ['t', 'T', "TRUE", "true", "True"]:
+    if len(sys.argv) > 3 and sys.argv[3] in ['t', 'T', "TRUE", "true", "True"]:
         use_full_filename = True
  #   print "add_rlabels_to_SSMs.py: inpath = \"" + inpath + "\" " + str(use_full_filename)
 
-    add_rlabels_to_single_ssm(inpath)
-
+#    add_rlabels_to_single_ssm(inpath)
+    infiles = get_file_list(indir, ".json")
+    inpathlist = build_path_list(indir, infiles)
+    build_rlabeled_ssm_path_list(infiles, outdir)
+    outpathlist = build_rlabeled_ssm_path_list(infiles, outdir)
+    for i, inpath in enumerate(inpathlist):
+        add_rlabels_to_single_ssm(inpath, outpathlist[i])
 
 if __name__ == "__main__":
     main()
