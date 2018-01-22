@@ -92,7 +92,7 @@ and without additional information the analyst would now conclude that all three
 
 <p>The analyst would look at the second "money" text item and see that it's associated with Responsibility [r23-1234] ("...education"). Although the node text is identical to that of the preceding, it's associated with a different Responsibility that would indicate a different coding, say "Child's Education Need."</p>
 
-<p>For the third node text item the analyst would look at the associated Responsibility &mdash; child's education [r11-1196] &mdash; and conclude that it should also be coded under "Child's Education Need," even though it's not only associated with a different Responsibility but that it's from a different SSM. However, although the actual Responsibility node is different (it's in a different SSM) it's semantically similar (in this case identical) to the Responsibility with r-label [r23-1234], so it would belong under the same code. That would be the analyst's judgment call, easy here because the two Responsibilities ([r23-1234] and [r11-1196]) have identical text, but it may not always be so obvious.</p>
+<p>For the third node text item the analyst would look at the associated Responsibility &mdash; child's education [r11-1196] &mdash; and conclude that it should also be coded under "Child's Education Need," even though it's not only associated with a different Responsibility <em>and</em> it's from a different SSM. However, although the actual Responsibility node is different (it's in a different SSM) it's semantically similar (in this case identical) to the Responsibility with r-label [r23-1234], so it would belong under the same code. That would be the analyst's judgment call, easy here because the two Responsibilities ([r23-1234] and [r11-1196]) have identical text, but it may not always be so obvious.</p>
 
 <p>Note that the RESPONSIBILITY node text items have their own "r-labels" attached so that the analyst can look them up by r-label to determine how to code all the other  associated node text items.</p>
 
@@ -102,5 +102,5 @@ and without additional information the analyst would now conclude that all three
 
 <h3>Traversing Responsibility subgraphs as undirected graphs</h3>
 
-<p>I'm working on treating maps as undirected graphs now, but ) I think this may not be useful, because I expect most nodes will have all or most rlabels from their originating maps assigned to them, thus hiding indications of useful relationships under a too-vast proliferation of rlabels. I tentatively suggest that this current implementation is potentially the  best solution we've come up with, pending confirmation by Shaghayegh.</p>
+<p>I'm working on treating maps as undirected graphs now, but I think this may not be useful, because I expect most nodes will have all or most rlabels from their originating maps assigned to them, thus hiding indications of useful relationships under a too-vast proliferation of rlabels. I tentatively suggest that this current implementation is potentially the  best solution we've come up with, pending confirmation by Shaghayegh.</p>
 
