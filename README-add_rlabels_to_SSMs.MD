@@ -15,11 +15,13 @@
         use_full_filename (optional): Boolean. If true, create rlabel using 
             the whole input SSM filename (excepting the .json extension). False
             is the default, in which case the SSM filename is expected to have
-            the form "text<database id>.json, where <database id is the SSM's
+            the form "text<database id>.json, where <database id> is the SSM's
             id in the server PostgreSQL database.
 </p>
 
-<p>First, every Responsibility in every SSM file in the input directory is identified and assigned an rlabel, as follows: "[r" + responsibility node id + "-" + SSM database id + "]".  This uniquely identifies every Responsibility in the input directory of SSMs. For instance, looking in a test ggregated.txt file, I see the text "Academic/classroom support" from the Responsibility node with id = 5 in the SSM with database id = 1008. My script has created an rlabel "[r5-1008]": it's the only responsibility in the whole directory with that rlabel. So the rlabel is appended to the text with this result: "Academic/classroom support [r5-1008]". That rlabel is now attached to that Responsibility's node text if you open up the rlabeled SSM, it's in the BLM generated from map 1008, and it's in the lists of node texts to be sorted, both in RESPONSIBILITIES.txt and aggregated.txt (the latter file simply being the concatenation of all the files of node texts to be sorted that have been separated by ring, both created by blm.R).</p>
+<p>First, every Responsibility in every SSM file in the input directory is identified and assigned an rlabel, as follows: 
+    "[r" + <responsibility node id> + "-" + <SSM database id> + "]".
+This uniquely identifies every Responsibility in the input directory of SSMs. For instance, looking in a test aggregated.txt file, I see the text "Academic/classroom support" from the Responsibility node with id = 5 in the SSM with database id = 1008. My script has created an rlabel "[r5-1008]": it's the only responsibility in the whole directory with that rlabel. So the rlabel is appended to the text with this result: "Academic/classroom support [r5-1008]". That rlabel is now attached to that Responsibility's node text if you open up the rlabeled SSM, it's in the BLM generated from map 1008, and it's in the lists of node texts to be sorted, both in RESPONSIBILITIES.txt and aggregated.txt (the latter file simply being the concatenation of all the files of node texts to be sorted that have been separated by ring, both created by blm.R).</p>
 
 <p>Next, the script does a graph traversal from each of those Responsibility nodes, tracking every connection *from* a source (Responsibility) *to* a target node until each of those nodes has had attached to its text that same rlabel for the Responsibility node at the root of the graph. Because of arrow directionality conventions, this means that it will primarily be Need nodes that are so labeled (Responsibilities point to Needs; most other node types, when they're connected to a Responsibility, point *to* it).</p> 
 
