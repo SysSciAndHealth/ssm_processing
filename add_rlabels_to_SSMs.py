@@ -10,6 +10,18 @@
     nodes that are linked to it in the SSM to which it belongs. Traverse that
     graph, attaching to each node the rlabel that uniquely identifies the root
     Responsibility. 
+
+    Currently accepts a path to a single file as command line argument, 
+    /path/to/ssmfile.json. Writes rlabeled equivalent to 
+    /path/to/ssmfile-rlabeled.json.
+    
+    2do: accept paths to input and output directories as arguments; rlabel
+    every SSM file in the input directory and write the resulting files to the
+    output directory.
+
+    2do: handle SSM file names that are not of the form name-<id>.json, where
+    <id> is the database id of the SSM, by using the full filename (absent the
+    ".json extension) in the rlabel.
 """
 
 import sys
@@ -36,7 +48,8 @@ def print_nodes(nodes, num):
 
 
 def convert(input):
-    """ https://stackoverflow.com/questions/13101653/python-convert-complex-dictionary-of-strings-from-unicode-to-ascii
+    """ Convenience function to convert from unicode to ascii for easier 
+        reading of diagnostic output. From https://stackoverflow.com/questions/13101653/python-convert-complex-dictionary-of-strings-from-unicode-to-ascii
     """
     if isinstance(input, dict):
         return {convert(key): convert(value) for key, value in input.iteritems()}
@@ -191,7 +204,7 @@ def add_rlabels_to_single_ssm(inpath):
         Responsibility nodes. For each Responsibility, append an rlabel which
         uniquely identifies that Responsibility to the "name" value of every
         node connected to that Responsibility.  Write the rlabeled dict as an
-	SSM to a .json file.
+        SSM to a .json file.
 
         Arg: 
             inpath: full path to an SSM file to be rlabeled.
