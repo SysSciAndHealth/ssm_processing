@@ -85,6 +85,7 @@ and without additional information the analyst would now conclude that all three
 <li>The first "money" node text item is attached to a Responsibility with node id 26 in the SSM with id 1234.</li>
 <li>The second "money" node text item is attached to a Responsibility with node id 23 in the SSM with id 1234. It's in the same SSM but attached to a different Responsibility and thus might or might not be coded differently, depending on the text for the Responsibility node[s] involved.</li>
 <li>The third "money" node text item is attached to a Responsibility with node id 11 in SSM with id 1196: different node, different SSM.</li>
+</ul>
 </p>
  
 <p>So the analyst would look at the first "money" node text item and see that it's associated with Responsibility [r26-1234] ("...health") and would choose to place it under some code like "Child's Health Care Need."</p>
