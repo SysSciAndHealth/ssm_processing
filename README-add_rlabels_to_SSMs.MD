@@ -29,7 +29,7 @@ This uniquely identifies every Responsibility in the input directory of SSMs. Fo
 
 <p>We still need to confirm which kinds of nodes are most susceptible to the "source ambiguity" problem identified by analyst Shaghayegh Arangdad. According to my notes from our meeting on 10/11/17, the main concern was with distinguishing whether it's one or multiple Responsibility nodes that are connected to multiple identical Needs. If this is indeed the case, then I think this approach might take care of it. More later about undirected graph traversals.</p>
 
-<h3>Real-world example</h3>
+<h3>Example</h3>
 <p>From aggregated.txt (or NEEDS.txt). There are these two (originally identical) node text items in the NEEDS list:
 
     ...
@@ -46,7 +46,7 @@ I think this is what Shaghayegh was referring to. Without the appended rlabels t
 
 Those could very well require different codes, and the analyst now has this additional information (via rlabel) to better inform her decision: whether to assign each the same or a different code. These two identical Responsibility nodes happen to be from the same SSM, but this whole process should apply just as well if they come from different maps. We've probably seen this more than once with needs like "time" or "money".</p>
 
-<h3>A more generic example</h3>
+<h3>Another example</h3>
 <p>An analyst might get a list of items to be coded that includes the following:
 
     ...
