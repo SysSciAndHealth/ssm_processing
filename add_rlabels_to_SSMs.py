@@ -6,7 +6,7 @@
 
     Approach
 
-    Treat each Responsbility node as the root of a graph comprised of all the 
+    Treat each Responsibility node as the root of a graph comprised of all the 
     nodes that are linked to it in the SSM to which it belongs. Traverse that
     graph, attaching to each node the rlabel that uniquely identifies the root
     Responsibility. 
@@ -187,8 +187,8 @@ def build_outpath(inpath):
 
 
 def traverse_rgraph(links, nodes, r, resp, fname):
-    """ For a given responsibility node r traverse the subgraph of nodes that
-        are connected to r, marking each as visited and appending the 
+    """ For a given responsibility node r traverse the *directed* subgraph of
+        nodes that are connected to r, marking each as visited and appending the
         appropriate rlabel to each of those connected nodes' "name" field.
 
         See http://www.cs.cornell.edu/courses/cs2112/2012sp/lectures/lec24/lec24-12sp.html: "Breadth-first search"
@@ -219,6 +219,7 @@ def traverse_rgraph(links, nodes, r, resp, fname):
     """
     r_id = r["id"]
     rlabel = build_rlabel(fname, r_id)
+    print "traverse_rgraph: fname = \"" + fname + "\""
     init_visitation(nodes, resp)
     init_rlabel_lists(nodes)
 
@@ -256,8 +257,13 @@ def traverse_rgraph(links, nodes, r, resp, fname):
                 q.put(s)
 
 
-def build_adjacency_matrix(nnodes, links):
-    m = [[0 for x in range(nnodes)] for y in range(nnodes)]
+def build_undirected_adjacency_matrix(num_nodes, links):
+    """ Note that if there is a link shown from a source to a target node, there
+        is also a link shown from target to source, i.e., m[i, j] == m[j, i].
+        It's assumed that redundncies will be handled elsewhere.
+    
+    """
+    m = [[0 for x in range(num_nodes)] for y in range(num_nodes)]
     for l in links:
         s = l["source"]
 	t = l["target"]
@@ -265,9 +271,22 @@ def build_adjacency_matrix(nnodes, links):
 
     return m
     
-"""
+
+'''
 def traverse_undirected_rgraph(m, nodes, r , resp, fname):
-    nnodes = len(nodes)
+    """
+
+    Args:
+        m: undirected adjacency matrix
+        nodes: a list of the nodes
+        r:
+        resp: 
+        fname: 
+
+    Returns:
+        None
+    """
+    num_nodes = len(nodes)
     r_id = r["id"]
     rlabel = build_rlabel(fname, r_id)
     init_visitation(nodes, resp)
@@ -278,10 +297,9 @@ def traverse_undirected_rgraph(m, nodes, r , resp, fname):
         n = q.get()
         newname = n["name"] + " " + rlabel
         n["name"] = newname
-        for i in range(0, nnodes):
+        for i in range(0, num_nodes):
                 if m[i][n["id"]] == 1:
-                    ] 
-"""
+'''
 
 
 def add_rlabels_to_single_ssm(inpath, outpath):
