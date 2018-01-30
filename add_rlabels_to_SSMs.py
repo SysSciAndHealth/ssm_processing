@@ -16,20 +16,15 @@
 
     Args:
         indir: A directory of System Support Map (SSM) files. Expects the files
-            to be in JSON format and end with extension .json.
+            to be in JSON format and end with extension ".json."
         outdir: A directory that is the intended target location for a set of 
             rlinked ssm files. If outdir doesn't exist, a reasonable attempt 
             will be made to create it.
         use_full_filename (optional): Boolean. If true, create rlabel using 
-            the whole input SSM filename (excepting the .json extension). False
-            is the default, in which case the SSM filename is expected to have
-            the form "text<database id>.json, where <database id is the SSM's
-            id in the server PostgreSQL database.
-
-    2do: handle SSM file names that are not of the form name-<id>.json, where
-    <id> is the database id of the SSM, by using the full filename (absent the
-    ".json extension) in the rlabel. This is what the optional use_full_filename
-    command line argument is for.
+            the whole input SSM filename (excepting the ".json" extension).
+            False is the default, in which case the SSM filename is expected to
+            have the form "text<database id>.json, where <database id is the
+            SSM's id in the server PostgreSQL database.
 """
 
 import sys
@@ -131,7 +126,8 @@ def init_rlabel_lists(nodes):
 
 def get_role(nodes):
     for n in nodes:
-        if n["type"] == "role":
+        #if n["type"] == "role":
+        if n["shape"] == "circle":
             return n
     return None
 
@@ -146,16 +142,38 @@ def init_visitation(nodes, responsibilities):
 
 
 def get_responsibilities(nodes):
-    resp = []
+    responsibilities = []
     for n in nodes:
-        if n["type"] == "responsibility":
-          resp.append(n)
-    return resp
+        #if n["type"] == "responsibility":
+        if n["shape"] == "rectangle":
+          responsibilities.append(n)
+    return responsibilities
 
 
 def build_rlabel(fname, r_id):
-    ssm_id = re.findall(r'\d+', fname)[-1]    
-    return "[r" + str(r_id) + "-" + ssm_id + "]"
+    """ The several scripts that extract SSMs from the database build filenames
+        that incorporate the SSM's database id into the filename. If that id is 
+        present in the filename we'd like to use it (for clarity and
+        compactness) in the rlabel. If the id is not in the filename, which has
+        occurred for sets of SSMs that we constructed by a researcher and saved
+        on a local machine, we use the full filename (with the ".json"
+        extension lopped off).
+
+    Args:
+        fname: the name of the current SSM file in which the Responsibility node
+            currently of interest is to be found.
+        r_id: the integer id of that Responsibility node in that SSM.
+
+    Returns:
+        an "rlabel" string
+    """
+    if use_full_filename:
+        basename = os.path.basename(fname)
+        base = os.path.splitext(basename)[0] 
+        return "[r" + str(r_id) + "-" + base + "]"
+    else:
+        ssm_id = re.findall(r'\d+', fname)[-1]    
+        return "[r" + str(r_id) + "-" + ssm_id + "]"
 
 
 def get_node(id, nodes):
@@ -186,7 +204,7 @@ def build_outpath(inpath):
     return split_inpath[0] + "-rlabeled.json"
 
 
-def traverse_rgraph(links, nodes, r, resp, fname):
+def traverse_rgraph(links, nodes, r, responsibilities, fname):
     """ For a given responsibility node r traverse the *directed* subgraph of
         nodes that are connected to r, marking each as visited and appending the
         appropriate rlabel to each of those connected nodes' "name" field.
@@ -206,21 +224,21 @@ def traverse_rgraph(links, nodes, r, resp, fname):
             }
         }
 
-        Args:
-            links: the links sub-dict from the current SSM.
-            nodes: the nodes subdict from the current SSM.
-            r: the responsbility node whose subgraph we're traversing.
-            resp: list of responsibility nodes: all need to be marked as
-                "visited."
-            fname: name of the SSM file from which these various elements have
-                been extracted.
-        Returns:
-            None
+    Args:
+        links: the links sub-dict from the current SSM.
+        nodes: the nodes sub-dict from the current SSM.
+        r: the responsbility node whose subgraph we're traversing.
+        responsibilities: list of responsibility nodes: all need to be marked as
+            visited to terminate traversal at their positions in the graph.
+        fname: name of the SSM file from which these various elements have been
+            extracted.
+
+    Returns:
+        None
     """
     r_id = r["id"]
     rlabel = build_rlabel(fname, r_id)
-    print "traverse_rgraph: fname = \"" + fname + "\""
-    init_visitation(nodes, resp)
+    init_visitation(nodes, responsibilities)
     init_rlabel_lists(nodes)
 
     q = Queue.Queue()
@@ -242,7 +260,7 @@ def traverse_rgraph(links, nodes, r, resp, fname):
     # node[c] but this won't find it. We need to convert the directed node 
     # representation to an undirected equivalent if the latter is what we wish
     # to capture. 
-    init_visitation(nodes, resp)
+    init_visitation(nodes, responsibilities)
     q.put(r)
     while not q.empty():
         n = q.get()
@@ -272,24 +290,29 @@ def build_undirected_adjacency_matrix(num_nodes, links):
     return m
     
 
-'''
-def traverse_undirected_rgraph(m, nodes, r , resp, fname):
-    """
+def traverse_undirected_rgraph(m, nodes, r, responsibilities, fname):
+    """ Traverse the subgraph with r at its root as though all links are
+        undirected.
+       
+        NOTE: Placeholder function not yet implemented.
 
     Args:
         m: undirected adjacency matrix
-        nodes: a list of the nodes
-        r:
-        resp: 
-        fname: 
+        (links: the links sub-dict from the current SSM.)?
+        nodes: the nodes sub-dict from the current SSM.
+        r: the responsbility node whose subgraph we're traversing.
+            responsibilities: list of responsibility nodes: all need to be
+                marked as "visited."
+        fname: name of the SSM file from which these various elements have
+                been extracted.
 
     Returns:
-        None
+            None
     """
     num_nodes = len(nodes)
     r_id = r["id"]
     rlabel = build_rlabel(fname, r_id)
-    init_visitation(nodes, resp)
+    init_visitation(nodes, responsibilities)
 
     q = Queue.Queue()
     q.put(r)
@@ -298,9 +321,9 @@ def traverse_undirected_rgraph(m, nodes, r , resp, fname):
         newname = n["name"] + " " + rlabel
         n["name"] = newname
         for i in range(0, num_nodes):
-                if m[i][n["id"]] == 1:
-'''
-
+            if m[i][n["id"]] == 1 or m[n["id"]][i] == 1:
+                print "traverse_undirected_rgraph inmost loop"
+                
 
 def add_rlabels_to_single_ssm(inpath, outpath):
     """ Open the SSM file located at "inpath". Read it into a dict. Find all
@@ -324,16 +347,19 @@ def add_rlabels_to_single_ssm(inpath, outpath):
     nodes = json_object["nodes"]
     print ("inpath: " + inpath + "; " + str(len(links)) + " links; " +
         str(len(nodes)) + " nodes")
-    resp = get_responsibilities(nodes)
-    print str(len(resp)) + " responsibility nodes"
-    for n, r in enumerate(resp):
+    responsibilities = get_responsibilities(nodes)
+    print str(len(responsibilities)) + " responsibility nodes"
+    for n, r in enumerate(responsibilities):
         print ("resp #" + str(n) + "; id: " + str(r["id"]) + "; name: \"" +
                r["name"] + "\"")
-        traverse_rgraph(links, nodes, r, resp, ntpath.basename(inpath))
+        traverse_rgraph(links, nodes, r, responsibilities,
+                        ntpath.basename(inpath))
     # print_nodes(nodes, 30)
     with open(outpath, "w") as outfile:
         json.dump(json_object, outfile)
 
+
+use_full_filename = False
 
 def main():
     if len(sys.argv) < 3:
@@ -345,9 +371,10 @@ def main():
         os.makedirs(outdir)
         print "Created " + outdir
 
-    use_full_filename = False
+    global use_full_filename
     if len(sys.argv) > 3 and sys.argv[3] in ['t', 'T', "TRUE", "true", "True"]:
         use_full_filename = True
+
  #   print "add_rlabels_to_SSMs.py: inpath = \"" + inpath + "\" " + str(use_full_filename)
 
 #    add_rlabels_to_single_ssm(inpath)
@@ -357,6 +384,8 @@ def main():
     outpathlist = build_rlabeled_ssm_path_list(infiles, outdir)
     for i, inpath in enumerate(inpathlist):
         add_rlabels_to_single_ssm(inpath, outpathlist[i])
+
+use_full_filename = False
 
 if __name__ == "__main__":
     main()
