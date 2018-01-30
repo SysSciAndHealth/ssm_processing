@@ -286,11 +286,10 @@ def build_undirected_adjacency_matrix(num_nodes, links):
         s = l["source"]
 	t = l["target"]
 	m[s][t] = m[t][s] = 1
-
     return m
     
 
-def traverse_undirected_rgraph(m, nodes, r, responsibilities, fname):
+def traverse_undirected_rgraph(links, nodes, r, responsibilities, fname):
     """ Traverse the subgraph with r at its root as though all links are
         undirected.
        
@@ -308,7 +307,6 @@ def traverse_undirected_rgraph(m, nodes, r, responsibilities, fname):
 
     Returns:
             None
-    """
     num_nodes = len(nodes)
     r_id = r["id"]
     rlabel = build_rlabel(fname, r_id)
@@ -321,9 +319,33 @@ def traverse_undirected_rgraph(m, nodes, r, responsibilities, fname):
         newname = n["name"] + " " + rlabel
         n["name"] = newname
         for i in range(0, num_nodes):
-            if m[i][n["id"]] == 1 or m[n["id"]][i] == 1:
-                print "traverse_undirected_rgraph inmost loop"
-                
+	    for j in range(0, num_nodes):
+                if m[i][j] == 1:
+                    print "traverse_undirected_rgraph inmost loop"
+    """
+    r_id = r["id"]
+    rlabel = build_rlabel(fname, r_id)
+    init_visitation(nodes, responsibilities)
+    init_rlabel_lists(nodes)
+    
+    undirlinks = []
+    for l in links:
+        undirlinks.append({"source": l["source"], "target": l["target"]})
+        undirlinks.append({"source": l["target"], "target": l["source"]})
+
+    q = Queue.Queue()
+    q.put(r)
+    while not q.empty():
+        n = q.get()
+        newname = n["name"] + " " + rlabel
+        n["name"] = newname
+        n["rlabels"].append(rlabel)
+        targets = get_targets_of(n, undirlinks, nodes)
+        for t in targets:
+            if t["visited"] == False:
+                t["visited"] = True;
+                q.put(t)
+
 
 def add_rlabels_to_single_ssm(inpath, outpath):
     """ Open the SSM file located at "inpath". Read it into a dict. Find all
@@ -352,8 +374,10 @@ def add_rlabels_to_single_ssm(inpath, outpath):
     for n, r in enumerate(responsibilities):
         print ("resp #" + str(n) + "; id: " + str(r["id"]) + "; name: \"" +
                r["name"] + "\"")
-        traverse_rgraph(links, nodes, r, responsibilities,
-                        ntpath.basename(inpath))
+        #traverse_rgraph(links, nodes, r, responsibilities,
+        #                ntpath.basename(inpath))
+        traverse_undirected_rgraph(links, nodes, r, responsibilities,
+                                   ntpath.basename(inpath))
     # print_nodes(nodes, 30)
     with open(outpath, "w") as outfile:
         json.dump(json_object, outfile)
