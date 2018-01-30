@@ -275,29 +275,16 @@ def traverse_rgraph(links, nodes, r, responsibilities, fname):
                 q.put(s)
 
 
-def build_undirected_adjacency_matrix(num_nodes, links):
-    """ Note that if there is a link shown from a source to a target node, there
-        is also a link shown from target to source, i.e., m[i, j] == m[j, i].
-        It's assumed that redundncies will be handled elsewhere.
-    
-    """
-    m = [[0 for x in range(num_nodes)] for y in range(num_nodes)]
-    for l in links:
-        s = l["source"]
-	t = l["target"]
-	m[s][t] = m[t][s] = 1
-    return m
-    
-
 def traverse_undirected_rgraph(links, nodes, r, responsibilities, fname):
     """ Traverse the subgraph with r at its root as though all links are
         undirected.
-       
-        NOTE: Placeholder function not yet implemented.
+
+	2do: This has turned out to be mostly a duplicate of the traverse_rgraph
+	function with undirlinks added, so if we want to keep it we should merge
+	the two and eliminate a bunch of copied-and-pasted code.
 
     Args:
-        m: undirected adjacency matrix
-        (links: the links sub-dict from the current SSM.)?
+        links: the links sub-dict from the current SSM.
         nodes: the nodes sub-dict from the current SSM.
         r: the responsbility node whose subgraph we're traversing.
             responsibilities: list of responsibility nodes: all need to be
@@ -307,21 +294,6 @@ def traverse_undirected_rgraph(links, nodes, r, responsibilities, fname):
 
     Returns:
             None
-    num_nodes = len(nodes)
-    r_id = r["id"]
-    rlabel = build_rlabel(fname, r_id)
-    init_visitation(nodes, responsibilities)
-
-    q = Queue.Queue()
-    q.put(r)
-    while not q.empty():
-        n = q.get()
-        newname = n["name"] + " " + rlabel
-        n["name"] = newname
-        for i in range(0, num_nodes):
-	    for j in range(0, num_nodes):
-                if m[i][j] == 1:
-                    print "traverse_undirected_rgraph inmost loop"
     """
     r_id = r["id"]
     rlabel = build_rlabel(fname, r_id)
@@ -382,8 +354,6 @@ def add_rlabels_to_single_ssm(inpath, outpath):
     with open(outpath, "w") as outfile:
         json.dump(json_object, outfile)
 
-
-use_full_filename = False
 
 def main():
     if len(sys.argv) < 3:
