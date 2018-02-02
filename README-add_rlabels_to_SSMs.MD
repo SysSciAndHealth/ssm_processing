@@ -28,10 +28,15 @@
 <p>For an SSM file with the database id as part of the filename (typically a file extracted from the server database using one of the scripts written for the purpose) the rlabel is of the form</p>
 
     [r<responsibility id>-<SSM id>]
+
 <p>where</p>
+
     <responsibility id>
-<p>is the id of a particular Responsibility node in the SSM json file whose database idi</p>
+
+<p>is the id of a particular Responsibility node in the SSM json file whose database id is</p>
+
     <SSM id>.
+
 <p>For a representative SSM named _Oneida_ffffft_bpellegr_1000.json we would assign the rlabel "[r1-1000]" to the Responsibility node with node id 1 (the SSM file was pulled from the database and it has id 1000), "[r2-1000]" to the Responsibility node with node id 2 from that same file, etc. We would then like to assign that same rlabel to any other node that's connected, directly or indirectly, to the corresponding Responsibility.</p>
 
 <h3>Naming rlabels for sets of SSMs without database ids</h3>
