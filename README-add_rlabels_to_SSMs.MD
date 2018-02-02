@@ -4,30 +4,58 @@
 
 <p>
     Usage:
-        add_rlabels_to_SSMs.py indir outdir [use_full_filename]
+        add_rlabels_to_SSMs.py indir outdir [use_full_filename] [undir]
 
     Args:
-        indir: A directory of System Support Map (SSM) files. Expects the files
-            to be in JSON format and end with extension .json.
-        outdir: A directory that is the intended target location for a set of 
-            rlinked ssm files. If outdir doesn't exist, a reasonable attempt 
-            will be made to create it.
-        use_full_filename (optional): Boolean. If True, create rlabel using 
-            the whole input SSM filename (excepting the .json extension). False
-            is the default, in which case the SSM filename is expected to have
-            the form "text<database id>.json, where <database id> is the SSM's
-            id in the server PostgreSQL database.
+        indir: String path to a directory of System Support Map (SSM) files.
+            Expects the files to be in JSON format and end with extension
+            ".json."
+        outdir: String path to a directory that is the intended target location
+            for a set of rlinked ssm files. If outdir doesn't exist, a
+            reasonable attempt will be made to create it.
+        use_full_filename (optional): Boolean. If true, create rlabel using
+            the whole input SSM filename (excepting the ".json" extension).
+            False is the default, in which case the SSM filename is expected to
+            have the form "text<database id>.json, where <database id is the
+            SSM's id in the server PostgreSQL database.
+        undir (optional): Boolean. if True, use an undirected graph traversal.
+            Otherwise, consider edge directionality when traversing
+            Responsibility subgraphs. Default is False (directed).
 </p>
 
-<p>First, every Responsibility in every SSM file in the input directory is identified and assigned an rlabel, as follows: 
+<h3>Naming rlabels for sets of SSMs with database ids in filenames</h3>
 
-    "[r" + <responsibility node id> + "-" + <SSM database id> + "]"
+<p>For an SSM file with the database id as part of the filename (typically a file extracted from the server database using one of the scripts written for the purpose) the rlabel is of the form
 
-This uniquely identifies every Responsibility in the input directory of SSMs. For instance, looking in a test aggregated.txt file, I see the text "Academic/classroom support" from the Responsibility node with id = 5 in the SSM with database id = 1008. My script has created an rlabel "[r5-1008]": it's the only Responsibility in the whole directory with that rlabel. So the rlabel is appended to the text with this result: "Academic/classroom support [r5-1008]". That rlabel is now attached to that Responsibility's node text if you open up the rlabeled SSM, it's in the BLM generated from map 1008, and it's in the lists of node texts to be sorted, both in RESPONSIBILITIES.txt and aggregated.txt (the latter file simply being the concatenation of all the files of node texts to be sorted that have been separated by ring, both created by blm.R).</p>
+    [r<responsibility id>-<SSM id>]
+where 
+    <responsibility id>
+is the id of a particular Responsibility node in the SSM json file whose database id is
+    <SSM id>.
+For a representative SSM named _Oneida_ffffft_bpellegr_1000.json we would assign the rlabel "[r1-1000]" to the Responsibility node with node id 1 (the SSM file was pulled from the database and it has id 1000), "[r2-1000]" to the Responsibility node with node id 2 from that same file, etc. We would then like to assign that same rlabel to any other node that's connected, directly or indirectly, to the corresponding Responsibility.</p>
 
-<p>Next, the script does a graph traversal from each of those Responsibility nodes, tracking every connection starting *from* a source (Responsibility) *to* all subsequent target nodes until each of those nodes has had attached to its text that same rlabel for the Responsibility node at the root of the graph. Because of arrow directionality conventions, this means that it will primarily be Need nodes that are so labeled (Responsibilities point to Needs; most other node types, when they're connected to a Responsibility, point *to* it).</p> 
+<h3>Naming rlabels for sets of SSMs without database ids</h3>
+<p>Some SSM sets may not be in the database -- they may have been built not with a wizard but with the basic <em>ssm</em> online tool and may have been saved only to a local machine -- and don't have database numbers. For these the best recourse I've been able to devise is to use the full file name along with the Responsibility's node id, which is still unique within that file. For example, the Responsibility node with node id 2 in a file named "06.08.15_7_Fv5.json" would be assigned the rlabel "[r2-06.08.15_7_Fv5]" (we can at least lop off the standard ".json" extension from the SSM filename.) This may be more cumbersome than is ideal, but it maximizes the probability that we uniquely identify a specific Responsibility within a set of SSMs when SSM database ids are unavailable.</p>
 
-<p>We still need to confirm which kinds of nodes are most susceptible to the "source ambiguity" problem identified by analyst Shaghayegh Arangdad. According to my notes from our meeting on 10/11/17, the main concern was with distinguishing whether it's one or multiple Responsibility nodes that are connected to multiple identical Needs. If this is indeed the case, then I think this approach might take care of it. More later about undirected graph traversals.</p>
+
+<p>With this tool we offer two ways to determine connectivity. Each has its virtues and shortcomings.</p>
+
+<h3>Undirected graph traversal</h3>
+<p>Treating an SSM as an undirected graph allows us to track even the most indirect connections between Responsibility and other nodes. This allows us to rlabel nodes that are only indirectly connected to a given Responsibility, notably Wishes and Resources, even though the edges point inward toward their responsibilities.</p>
+
+<p>However, there are shortcomings to the undirected approach. Often, particularly with wizard-built maps, here are enough links (i.e., edges or arrows) and they are sufficiently intertwined that, when the Responsibility node subgraphs for this map are traversed using an undirected algorithm, we find that almost every node is eventually connected to every Responsibility node -- you can trace the connections manually by ignoring edge direction -- and as a consequence all but two of the non-Responsibility nodes (ignoring the Role, which is excluded in code) exhibit all of the rlabels, thus rendering the rlabeling process useless for this very common kind of SSM. I believe the algorithm works "correctly"; unfortunately, it doesn't appear to do us much good in this case.</p>
+
+<h3>Directed graph traversal</h3>
+<p>With this approach we consider the directionality of the links between the nodes. This approach would probably work very well if all the links pointed outward. Unfortunately, the convention has been established that links from Resources and Wishes point inwards. The directed traversal implementation accurately identifies what Needs are connected to which Responsibility. However, we can't find which Resources and Wishes may be connected indirectly to a certain Responsibility through an intermediary node, typically a Need, because the arrows change direction.</p>
+
+</p>Need node text here includes rlabels that correctly identify the Responsibility nodes they are attached to. On the plus side, there isn't the obfuscating clutter of extraneous rlabels we see in the undirected traversal implementation. However, the inward-pointing Resource and Wish nodes are not rlabeled, so we are unable to use rlabeling to distinguish between them.
+
+ 
+
+<h3>Recommendation</h3>
+<p>For the future, I believe that pointing all arrows out would make the directed rlabeling process work well. There's still the legacy of existing sets of maps, however. Rather more intimidating is the likelihood that changing half a dozen wizards to suit such a new convention would be a very time-consuming task.</p>
+
+</p>A directed implementation currently offers a limited but useful disambiguating capability, although Resources and Wishes are excluded. Would it be worth talking with Shaghayegh about this when she returns? 
 
 <h3>Example</h3>
 <p>From aggregated.txt (or NEEDS.txt). There are these two (originally identical) node text items in the NEEDS list:
@@ -103,8 +131,4 @@ and without additional information the analyst would now conclude that all three
 <p>ROLE node text items wouldn't get rlabels. Neither, of course, would text from any nodes that aren't attached to any Responsibilities.</p>
 
 <p>If a node is attached to multiple Responsibilities, it gets multiple rlabels, one for each. How does the analyst handle such an eventuality?</p>
-
-<h3>Traversing Responsibility subgraphs as undirected graphs</h3>
-
-<p>I'm working on treating maps as undirected graphs now, but I think this may not be useful, because I expect most nodes will have all or most rlabels from their originating maps assigned to them, thus hiding indications of useful relationships under a too-vast proliferation of rlabels. I tentatively suggest that this current implementation is potentially the  best solution we've come up with, pending confirmation by Shaghayegh.</p>
 
