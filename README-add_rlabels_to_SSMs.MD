@@ -40,44 +40,41 @@
 <p>For a representative SSM named _Oneida_ffffft_bpellegr_1000.json we would assign the rlabel "[r1-1000]" to the Responsibility node with node id 1 (the SSM file was pulled from the database and it has id 1000), "[r2-1000]" to the Responsibility node with node id 2 from that same file, etc. We would then like to assign that same rlabel to any other node that's connected, directly or indirectly, to the corresponding Responsibility.</p>
 
 <h3>Naming rlabels for sets of SSMs without database ids</h3>
-<p>Some SSM sets may not be in the database -- they may have been built not with a wizard but with the basic <em>ssm</em> online tool and may have been saved only to a local machine -- and don't have database numbers. For these the best recourse I've been able to devise is to use the full file name along with the Responsibility's node id, which is still unique within that file. For example, the Responsibility node with node id 2 in a file named "06.08.15_7_Fv5.json" would be assigned the rlabel "[r2-06.08.15_7_Fv5]" (we can at least lop off the standard ".json" extension from the SSM filename.) This may be more cumbersome than is ideal, but it maximizes the probability that we uniquely identify a specific Responsibility within a set of SSMs when SSM database ids are unavailable.</p>
-
+<p>Some SSM sets may not be in the database -- they may have been built not with a wizard but with the basic <em>ssm</em> online tool and may have been saved only to a local machine -- and don't have database numbers. For these we use the full file name along with the Responsibility's node id, which is still unique within that file. For example, the Responsibility node with node id 2 in a file named "06.08.15_7_Fv5.json" would be assigned the rlabel "[r2-06.08.15_7_Fv5]" (we can at least lop off the standard ".json" extension from the SSM filename.) This may be more cumbersome than is ideal, but it maximizes the probability that we uniquely identify a specific Responsibility within a set of SSMs when SSM database ids are unavailable.</p>
 
 <p>With this tool we offer two ways to determine connectivity. Each has its virtues and shortcomings.</p>
 
 <h3>Undirected graph traversal</h3>
-<p>Treating an SSM as an undirected graph allows us to track even the most indirect connections between Responsibility and other nodes. This allows us to rlabel nodes that are only indirectly connected to a given Responsibility, notably Wishes and Resources, even though the edges point inward toward their responsibilities.</p>
+<p>Treating an SSM as an undirected graph allows us to track even the most indirect connections between a Responsibility and other nodes. This allows us to rlabel nodes that are only indirectly connected to a given Responsibility, notably Wishes and Resources, even though the edges point inward toward their Responsibilities.</p>
 
-<p>However, there are shortcomings to the undirected approach. Often, particularly with wizard-built maps, here are enough links (i.e., edges or arrows) and they are sufficiently intertwined that, when the Responsibility node subgraphs for this map are traversed using an undirected algorithm, we find that almost every node is eventually connected to every Responsibility node -- you can trace the connections manually by ignoring edge direction -- and as a consequence all but two of the non-Responsibility nodes (ignoring the Role, which is excluded in code) exhibit all of the rlabels, thus rendering the rlabeling process useless for this very common kind of SSM. I believe the algorithm works "correctly"; unfortunately, it doesn't appear to do us much good in this case.</p>
+<p>However, there are shortcomings to the undirected approach. Often, particularly with wizard-built maps, there are enough links (i.e., edges or arrows) and they are sufficiently intertwined that, when the Responsibility node subgraphs for this map are traversed using an undirected algorithm, we find that almost every node is eventually connected to every Responsibility node -- you can trace the connections manually by ignoring edge direction -- and as a consequence most of the non-Responsibility nodes (ignoring the Role, which is excluded in code) exhibit all of the rlabels, thus rendering the rlabeling process useless for this very common SSM node configuration. The algorithm appears to work "correctly"; unfortunately, it doesn't appear to do us much good in this case.</p>
 
 <h3>Directed graph traversal</h3>
 <p>With this approach we consider the directionality of the links between the nodes. This approach would probably work very well if all the links pointed outward. Unfortunately, the convention has been established that links from Resources and Wishes point inwards. The directed traversal implementation accurately identifies what Needs are connected to which Responsibility. However, we can't find which Resources and Wishes may be connected indirectly to a certain Responsibility through an intermediary node, typically a Need, because the arrows change direction.</p>
 
 </p>Need node text here includes rlabels that correctly identify the Responsibility nodes they are attached to. On the plus side, there isn't the obfuscating clutter of extraneous rlabels we see in the undirected traversal implementation. However, the inward-pointing Resource and Wish nodes are not rlabeled, so we are unable to use rlabeling to distinguish between them.
 
- 
-
 <h3>Recommendation</h3>
-<p>For the future, I believe that pointing all arrows out would make the directed rlabeling process work well. There's still the legacy of existing sets of maps, however. Rather more intimidating is the likelihood that changing half a dozen wizards to suit such a new convention would be a very time-consuming task.</p>
+<p>For the future, I believe that pointing all arrows in a consistent direction would make the directed rlabeling process work well. There's still the legacy of existing sets of maps, however. Rather more intimidating is the prospect of changing half a dozen wizards to suit such a new convention.</p>
 
-</p>A directed implementation currently offers a limited but useful disambiguating capability, although Resources and Wishes are excluded. Would it be worth talking with Shaghayegh about this when she returns? 
+</p>A directed implementation currently offers a limited but useful disambiguating capability, although Resources and Wishes are excluded.</p>
 
 <h3>Example</h3>
-<p>From aggregated.txt (or NEEDS.txt). There are these two (originally identical) node text items in the NEEDS list:
+<p>From some aggregated.txt (or NEEDS.txt), ie., a file of node text items to be sorted under various <em>codes</em> (see https://github.com/steve9000gi/sort for details of the coding process). There are these two (originally identical) node text items in the NEEDS list:
 
     ...
     time commitment [r4-1000]
     time commitment [r5-1000]
     ...
 
-I think this is what Shaghayegh was referring to. Without the appended rlabels these two items would be indistinguishable and would probably both be coded the same. However, we see from the rlabels that the first is connected to the Responsibility with id = 4  and the second to the Responsibility with id = 5 from the SSM with database id 1000. The sorting analyst can look under RESPONSIBILITIES and find the corresponding node texts: 
+Without the appended rlabels these two items would be indistinguishable and would probably both be coded the same. However, we see from the rlabels that the first is connected to the Responsibility with id = 4  and the second to the Responsibility with id = 5 from the SSM with database id 1000. The sorting analyst can look under RESPONSIBILITIES and find the corresponding node texts: 
 
     ...
     County Fiscal Team for Special Children's Services division [r4-1000]
     Early Intervention Coordinating Council participant [r5-1000]
     ...
 
-Those could very well require different codes, and the analyst now has this additional information (via rlabel) to better inform her decision: whether to assign each the same or a different code. These two identical Responsibility nodes happen to be from the same SSM, but this whole process should apply just as well if they come from different maps. We've probably seen this more than once with needs like "time" or "money".</p>
+Those could very well require different codes, and the analyst now has this additional information (via rlabel) to better inform her decision: whether to assign each the same or a different code. These two identical Responsibility nodes happen to be from the same SSM, but this whole process should apply just as well if they come from different maps. We've seen this replication frequently with Needs like "time" or "money."</p>
 
 <h3>Another example</h3>
 <p>An analyst might get a list of items to be coded that includes the following:
