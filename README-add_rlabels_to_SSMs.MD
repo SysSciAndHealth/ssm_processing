@@ -25,7 +25,7 @@
 
 <h3>Naming rlabels for sets of SSMs with database ids in filenames</h3>
 
-<p>For an SSM file with the database id as part of the filename (typically a file extracted from the server database using one of the scripts written for the purpose) the rlabel is of the form</p>
+<p>For an SSM file with the database id as part of the filename (typically a file extracted from the server database using one of the scripts written for the purpose, e.g., https://github.com/steve9000gi/ssm_processing/blob/master/get_maps.py) the rlabel is of the form</p>
 
     [r<responsibility id>-<SSM id>]
 
