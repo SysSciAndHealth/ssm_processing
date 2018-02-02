@@ -25,14 +25,14 @@
 
 <h3>Naming rlabels for sets of SSMs with database ids in filenames</h3>
 
-<p>For an SSM file with the database id as part of the filename (typically a file extracted from the server database using one of the scripts written for the purpose) the rlabel is of the form
+<p>For an SSM file with the database id as part of the filename (typically a file extracted from the server database using one of the scripts written for the purpose) the rlabel is of the form</p>
 
     [r<responsibility id>-<SSM id>]
-where 
+<p>where</p>
     <responsibility id>
-is the id of a particular Responsibility node in the SSM json file whose database id is
+<p>is the id of a particular Responsibility node in the SSM json file whose database idi</p>
     <SSM id>.
-For a representative SSM named _Oneida_ffffft_bpellegr_1000.json we would assign the rlabel "[r1-1000]" to the Responsibility node with node id 1 (the SSM file was pulled from the database and it has id 1000), "[r2-1000]" to the Responsibility node with node id 2 from that same file, etc. We would then like to assign that same rlabel to any other node that's connected, directly or indirectly, to the corresponding Responsibility.</p>
+<p>For a representative SSM named _Oneida_ffffft_bpellegr_1000.json we would assign the rlabel "[r1-1000]" to the Responsibility node with node id 1 (the SSM file was pulled from the database and it has id 1000), "[r2-1000]" to the Responsibility node with node id 2 from that same file, etc. We would then like to assign that same rlabel to any other node that's connected, directly or indirectly, to the corresponding Responsibility.</p>
 
 <h3>Naming rlabels for sets of SSMs without database ids</h3>
 <p>Some SSM sets may not be in the database -- they may have been built not with a wizard but with the basic <em>ssm</em> online tool and may have been saved only to a local machine -- and don't have database numbers. For these the best recourse I've been able to devise is to use the full file name along with the Responsibility's node id, which is still unique within that file. For example, the Responsibility node with node id 2 in a file named "06.08.15_7_Fv5.json" would be assigned the rlabel "[r2-06.08.15_7_Fv5]" (we can at least lop off the standard ".json" extension from the SSM filename.) This may be more cumbersome than is ideal, but it maximizes the probability that we uniquely identify a specific Responsibility within a set of SSMs when SSM database ids are unavailable.</p>
