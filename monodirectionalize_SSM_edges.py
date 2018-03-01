@@ -105,36 +105,11 @@ def print_list(list, title):
         i += 1
 
 
-def get_responsibilities(nodes):
-    responsibilities = []
-    for n in nodes:
-        # if n["type"] == "responsibility":
-        if n["shape"] == "rectangle":
-            responsibilities.append(n)
-    return responsibilities
-
-
 def get_node(id, nodes):
     for n in nodes:
         if n["id"] == id:
             return n
     return None
-
-
-def get_targets_of(n, links, nodes):
-    targets = []
-    for l in links:
-        if l["source"] == n["id"]:
-            targets.append(get_node(l["target"], nodes))
-    return targets
-
-
-def get_sources_of(n, links, nodes):
-    sources = []
-    for l in links:
-        if l["target"] == n["id"]:
-            sources.append(get_node(l["source"], nodes))
-    return sources
 
 
 def build_outpath(inpath):
@@ -163,21 +138,12 @@ def monodirectionalize_single_ssm(inpath, outpath):
     nodes = json_object["nodes"]
     print ("inpath: " + inpath + "; " + str(len(links)) + " links; " +
            str(len(nodes)) + " nodes")
-    #responsibilities = get_responsibilities(nodes)
-    #print str(len(responsibilities)) + " responsibility nodes"
-    #for n, r in enumerate(responsibilities):
-    #    print ("resp #" + str(n) + "; id: " + str(r["id"]) + "; name: \"" +
-    #           r["name"] + "\"")
-    # print_nodes(nodes, 30)
-
     for link in links:
         source_id = link["source"]
 	target_id = link["target"]
 	print "source_id: " + str(source_id) + "; " + "target_id: " + str(target_id)
 	source_node = [node for node in nodes if node["id"] == source_id][0]
 	target_node = [node for node in nodes if node["id"] == target_id][0]
-	#print ("source_node[\"shape\"]: " + source_node["shape"] + "; " +
-	#      "target_node[\"shape\"]: " +  target_node["shape"]
 	if source_node["shape"] in ["star", "ellipse"]:
 	    temp = link["source"]
 	    link["source"] = link["target"]
@@ -195,7 +161,6 @@ def main():
     if not os.path.exists(outdir):
         os.makedirs(outdir)
         print "Created " + outdir
-
     infiles = get_file_list(indir, ".json")
     inpathlist = build_path_list(indir, infiles)
     outpathlist = build_monodirectionalized_ssm_path_list(infiles, outdir)
