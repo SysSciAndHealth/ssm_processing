@@ -4,7 +4,7 @@
     a Responsibility node in the context of a set (a directory) of System
     Support Maps (SSMs).
 
-    Approach
+    Approach:
 
     Treat each Responsibility node as the root of a graph comprised of all the
     nodes that are linked to it in the SSM to which it belongs. Traverse that
@@ -386,7 +386,6 @@ def main():
 #    add_rlabels_to_single_ssm(inpath)
     infiles = get_file_list(indir, ".json")
     inpathlist = build_path_list(indir, infiles)
-    build_rlabeled_ssm_path_list(infiles, outdir)
     outpathlist = build_rlabeled_ssm_path_list(infiles, outdir)
     for i, inpath in enumerate(inpathlist):
         add_rlabels_to_single_ssm(inpath, outpathlist[i])

@@ -12,8 +12,8 @@
 
     Args:
         indir: String path to a directory of System Support Map (SSM) files.
-            Expects the files to be in JSON format and end with extension
-            ".json."
+            Expects the files to be in SSM JSON format and end with extension
+            ".json"..
         outdir: String path to a directory that is the intended target location
             for a set of rlinked ssm files. If outdir doesn't exist, a
             reasonable attempt will be made to create it.
@@ -77,11 +77,13 @@ def build_path_list(dir, file_list):
 
 def build_monodirectionalized_ssm_path_list(ssm_files, out_dir):
     """ Builds a list of full paths to a set of monodirectionalized SSM files.
+
     Args:
         ssm_files: A list of SSM filenames, used as the basis for creating
             monodirectionalized SSM filenames.
         out_dir: Path to a directory into which monodirectionalized SSM files
-	    are intended to go.
+            are intended to go.
+    
     Returns:
        A list of full paths to monodirectionalized SSM files.
     """
@@ -92,7 +94,7 @@ def build_monodirectionalized_ssm_path_list(ssm_files, out_dir):
             out_files.append(out_path)
         else:
             print ("build_monodirectionalized_ssm_path_list: non-standard " +
-	           "input file name: " + fname)
+                   "input file name: " + fname)
     return out_files
 
 
@@ -120,13 +122,13 @@ def build_outpath(inpath):
 def monodirectionalize_single_ssm(inpath, outpath):
     """ Open the SSM file located at "inpath". Read it into a dict. Find all
         Wish and resource nodes. For each, find all links that include that
-	node, and in each of those links switch the values for "source" and 
-	"target". Write the monodirectionalized dict as an SSM to outpath.
+        node, and in each of those links switch the values for "source" and 
+        "target". Write the monodirectionalized dict as an SSM to outpath.
 
         Args:
             inpath: full path to an SSM file to be monodirectionalized.
             outpath: full path to an SSM file that will be the
-	    monodirectionalized equivalent of the SSM at inpath.
+                monodirectionalized equivalent of the SSM at inpath.
 
         Returns:
             None
@@ -140,14 +142,12 @@ def monodirectionalize_single_ssm(inpath, outpath):
            str(len(nodes)) + " nodes")
     for link in links:
         source_id = link["source"]
-	target_id = link["target"]
-	print "source_id: " + str(source_id) + "; " + "target_id: " + str(target_id)
-	source_node = [node for node in nodes if node["id"] == source_id][0]
-	target_node = [node for node in nodes if node["id"] == target_id][0]
-	if source_node["shape"] in ["star", "ellipse"]:
-	    temp = link["source"]
-	    link["source"] = link["target"]
-	    link["target"] = temp
+        print "source_id: " + str(source_id)
+        source_node = [node for node in nodes if node["id"] == source_id][0]
+        if source_node["shape"] in ["star", "ellipse"]:
+            temp = link["source"]
+            link["source"] = link["target"]
+            link["target"] = temp
     with open(outpath, "w") as outfile:
         json.dump(json_object, outfile)
 
