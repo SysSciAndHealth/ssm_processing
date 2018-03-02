@@ -22,9 +22,6 @@
 import sys
 import os
 import json
-import re
-import ntpath
-import Queue
 
 
 def print_node(n):
@@ -114,16 +111,15 @@ def get_node(id, nodes):
     return None
 
 
-def build_outpath(inpath):
-    split_inpath = inpath.rsplit('.', 1)
-    return split_inpath[0] + "-monodir.json"
-
-
 def monodirectionalize_single_ssm(inpath, outpath):
     """ Open the SSM file located at "inpath". Read it into a dict. Find all
-        Wish and resource nodes. For each, find all links that include that
-        node, and in each of those links switch the values for "source" and 
-        "target". Write the monodirectionalized dict as an SSM to outpath.
+        Wish (star-shaped) and Resource (ellipsoidal) nodes. For each, find all
+        links that include that node, and in each of those links switch the
+        values for "source" and "target". Write the monodirectionalized dict as
+        an SSM to outpath.
+
+        Assumes that links for Wishes and Resources always point inwards, and 
+        that all other links point outwards.
 
         Args:
             inpath: full path to an SSM file to be monodirectionalized.
