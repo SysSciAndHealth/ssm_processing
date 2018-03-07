@@ -114,7 +114,7 @@ def get_node(id, nodes):
 def monodirectionalize_single_ssm(inpath, outpath):
     """ Open the SSM file located at "inpath". Read it into a dict. Find all
         Wish (star-shaped) and Resource (ellipsoidal) nodes. For each, find all
-        links that include that node, and in each of those links switch the
+        links whose source is that node, and in each of those links switch the
         values for "source" and "target". Write the monodirectionalized dict as
         an SSM to outpath.
 
