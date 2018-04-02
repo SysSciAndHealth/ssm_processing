@@ -7,8 +7,9 @@
 
     Args:
         cblm_dir: A directory of Coded Binary Link Matrix (CBLM) files.
-        code_matrix_dir: A directory (required to exist) where a set of Code
-            Matrix (CM) files is going to be put.
+        code_matrix_dir: A directory where a set of Code Matrix (CM) files is
+            going to be put. If this directory does not exist, a reasonable
+            effort will be made to create it. 
 
     Requires that the files in the two directories follow these naming
     conventions:
@@ -123,7 +124,7 @@ def populate_df(cblm, df_template, master_code_list):
         them in the file represented by the cblm arg.
     """
     popd_df = df_template.copy()
-    #print "About to read " + cblm
+    print "About to read " + cblm
     cblm_df = pd.read_csv(cblm, sep='\t')
     curr_code_list = cblm_df["Code"].values.tolist()
     blm = cblm_df.ix[:, 7:] # from first column of adjacency matrix ("blm")
@@ -154,6 +155,7 @@ def write_code_matrix(file_path, populated_df, code_list):
     Returns:
         None
     """
+    print "About to write " + file_path
     with open(file_path, 'w') as file_obj:
         populated_df.to_csv(path_or_buf=file_obj, sep='\t')
 
@@ -186,8 +188,21 @@ def write_code_matrices(cblm_paths, cm_paths, df_template, code_list):
 
 
 def main():
+    if len(sys.argv) < 3:
+        print "usage: create_code_matrices.py cblm_dir code_matrix_dir"
+        return
+ 
     cblm_dir = sys.argv[1]
+    if not os.path.exists(cblm_dir):
+        print ("Input error: CBLM input directory \"" + cblm_dir +
+               "\" does not exist.")
+        return
+
     code_matrix_dir = sys.argv[2]
+    if not os.path.exists(code_matrix_dir):
+        os.makedirs(code_matrix_dir)
+        print "Created " + code_matrix_dir
+
     cblm_file_list = get_cblm_file_list(cblm_dir)
     cblm_path_list = build_cblm_path_list(cblm_dir, cblm_file_list)
     code_list = sorted(set(create_code_list(cblm_path_list)))
