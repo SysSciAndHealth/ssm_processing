@@ -7,7 +7,7 @@
 	files of Coded SSMs (CSSMs).
 
     Usage:
-    ./add_codes_to_SSMs.py ssm_dir cblm_dir cssm_dir
+    add_codes_to_SSMs.py ssm_dir cblm_dir cssm_dir
 
     Assumes that each SSM in ssm_dir has a corresponding CBLM file in cblm_dir,
     and that the files for all three directories follow this naming convention:
@@ -25,9 +25,6 @@ import json
 import re
 import ntpath
 
-ssm_dir = sys.argv[1]
-cblm_dir = sys.argv[2]
-cssm_dir = sys.argv[3]
 
 def add_codes_to_single_ssm(ssm, cblm, cssm_dir):
     with open(ssm) as json_input_file:
@@ -63,16 +60,46 @@ def add_codes_to_single_ssm(ssm, cblm, cssm_dir):
     with open(outfilename, "w") as outfile:
 	json.dump(json_object, outfile)
 
-# main
-ssm_files = []
-ssm_files += [fn for fn in os.listdir(ssm_dir) if fn.endswith(".json")]
 
-cblm_files = []
-cblm_files += [fn for fn in os.listdir(cblm_dir) if fn.endswith("-CBLM.csv")]
+def main():
+    if len(sys.argv) < 4:
+        print "usage: add_codes_to_SSMs.py ssm_dir cblm_dir cssm_dir"
+        return
 
-print str(len(ssm_files)) + " =?= " + str(len(cblm_files)) # 1 CBLM for each SSM
+    ssm_dir = sys.argv[1]
+    cblm_dir = sys.argv[2]
+    cssm_dir = sys.argv[3]
 
-for i, ssm in enumerate(ssm_files):
-    ssm_path = ssm_dir + "/" + ssm
-    cblm_path = cblm_dir + "/" + cblm_files[i]
-    add_codes_to_single_ssm(ssm_path, cblm_path, cssm_dir)
+    if not os.path.exists(ssm_dir):
+        print ("Input error: SSM input directory \"" + ssm_dir +
+               "\" does not exist.")
+        return
+
+    if not os.path.exists(cblm_dir):
+        print ("Input error: CBLM input directory \"" + cblm_dir +
+               "\" does not exist.")
+        return
+
+    if not os.path.exists(cssm_dir):
+        os.makedirs(cssm_dir)
+        print "Created " + cssm_dir
+
+    ssm_files = []
+    ssm_files += [fn for fn in os.listdir(ssm_dir) if fn.endswith(".json")]
+    
+    cblm_files = []
+    cblm_files += [fn for fn in os.listdir(cblm_dir) if fn.endswith("-CBLM.csv")]
+    
+    if len(ssm_files) != len(cblm_files):
+	print "Input error: number of SSMs does not equal number of CBLMS."
+	return
+    
+    for i, ssm in enumerate(ssm_files):
+        ssm_path = ssm_dir + "/" + ssm
+        cblm_path = cblm_dir + "/" + cblm_files[i]
+        add_codes_to_single_ssm(ssm_path, cblm_path, cssm_dir)
+
+
+if __name__ == "__main__":
+      main()
+
