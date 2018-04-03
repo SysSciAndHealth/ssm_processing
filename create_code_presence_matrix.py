@@ -12,8 +12,9 @@
 
     Args:
         cblm_dir: A directory of Coded Binary Link Matrix (CBLM) files.
-        output_dir: A directory (required to exist) where the code presence
-            matrix is going to be put.
+        output_dir: A directory where the code presence matrix is going to be
+            deposited. If output_dir does not exist, a reasonable effort will be
+            made to create it.
 
     Requires that the files in cblm_dir follow this naming convention:
         CBLM file: "<name>-CBLM.csv"
@@ -101,8 +102,21 @@ def write_matrix(df, output_path):
 
 
 def main():
+    if len(sys.argv) < 3:
+        print "create_code_presence_matrix.py cblm_dir output_dir"
+        return
+
     cblm_dir = sys.argv[1]
+    if not os.path.exists(cblm_dir):
+        print ("Input error: CBLM directory \""  + cblm_dir +
+               "\" does not exist.")
+        return
+
     output_path = sys.argv[2]
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+        print "Created " + output_path
+
     cblm_file_list = get_cblm_file_list(cblm_dir)
     cblm_path_list = build_cblm_path_list(cblm_dir, cblm_file_list)
     code_list = sorted(set(create_code_list(cblm_path_list)))
