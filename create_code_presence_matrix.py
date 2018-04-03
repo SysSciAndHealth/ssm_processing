@@ -103,7 +103,7 @@ def write_matrix(df, output_path):
 
 def main():
     if len(sys.argv) < 3:
-        print "create_code_presence_matrix.py cblm_dir output_dir"
+        print "usage: create_code_presence_matrix.py cblm_dir output_dir"
         return
 
     cblm_dir = sys.argv[1]
