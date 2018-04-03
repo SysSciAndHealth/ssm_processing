@@ -127,14 +127,24 @@ def convert_list_to_json_format(lst):
     return json
 
 
-# main:
-infilename = sys.argv[1]
-outfilename = generate_outfilename(infilename)
-print sys.argv[0] + ': ' + infilename + ' -> ' + outfilename
+def main():
+    if len(sys.argv) < 2:
+        print "usage: text2JSON.py path_to_text_file"
+        return 
 
-lst = get_list_from_file(infilename)
-with open(outfilename, 'w') as outfile:
-    #json.dump(convert_list_to_dict(lst), outfile)
-    json.dump(convert_list_to_json_format(lst), outfile)
+    infilename = sys.argv[1]
+    if (not os.path.exists(infilename) and os.path.isfile(infilename)):
+        print "Input error: input file \"" + infilename + "\"does not exist."
+        return
 
+    outfilename = generate_outfilename(infilename)
+    print sys.argv[0] + ': ' + infilename + ' -> ' + outfilename
+    
+    lst = get_list_from_file(infilename)
+    with open(outfilename, 'w') as outfile:
+        json.dump(convert_list_to_json_format(lst), outfile)
+
+
+if __name__ == "__main__":
+    main()
 
