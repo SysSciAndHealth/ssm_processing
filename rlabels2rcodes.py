@@ -48,6 +48,11 @@ def get_file_list(dir, suffix):
 
 def build_path_list(dir, file_list):
     """ Builds a list of full paths to a set of files.
+    Args:
+        dir: the path to a directory.
+        file_list: a list of files.
+    Returns:
+        A list of full paths.
     """
     return [dir + "/" + filename for filename in file_list]
 
@@ -86,7 +91,7 @@ def print_list(list, title):
 
 
 def convert(input):
-    """ Convenience function to convert from unicode to ascii for easier
+    """ Convenience function to convert from unicode to utf-8 for easier
         reading of diagnostic output. From https://stackoverflow.com/questions/13101653/python-convert-complex-dictionary-of-strings-from-unicode-to-ascii
     """
     if isinstance(input, dict):
@@ -126,12 +131,15 @@ def replace_rlabels_with_rcodes(rcode_lookup, ssm):
         then replace each rlabel with the corresponding rcode as indicated in
         rcode_lookup.
     
-        Args:
-            rcode_lookup:
-            ssm:
+    Args:
+        rcode_lookup: set of key-value pairs where the key is a code and its 
+            corresponding value is a node text item that typically has one or
+            more rlabels appended.
+        ssm: a JSON-encoded System Support Map that, if this function is to be
+            useful, includes rlabels.
     
-        Returns: a system support map identical to ssm except that each rlabel
-            has been replaced with its corresponding rcode.
+    Returns: a system support map identical to ssm except that each rlabel
+        has been replaced with its corresponding rcode.
     """
     rcoded_ssm = ssm 
     keys = rcode_lookup.keys()
