@@ -138,9 +138,11 @@ def get_role(nodes):
 
 def init_visitation(nodes, responsibilities):
     mark_nodes_unvisited(nodes)
+    """ 2018/06/12: Now that we're rcoding, we want Roles to get rlabels, too.
     role = get_role(nodes)
     if role is not None:
         role["visited"] = True
+    """
     for r in responsibilities:
         r["visited"] = True
 
